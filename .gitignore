@@ -1,3 +1,6 @@
 # Jenkins .war file
 jenkins
 
+# Source code of a project to build
+spring-boot
+
