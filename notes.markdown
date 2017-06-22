@@ -70,6 +70,64 @@ The archived artifact will be shown in the Project view in this case. It depends
 
 # Testing and CI
 
+Add build steps to your project: execute shell script, run maven target,...
+
+Add build triggers or build post-build actions
+
+But that way is the *old* way. We're going to take a look at the modern way, the Pipeline way.
+
+When creating a Pipeline project, there is no *build* step, or *post-build* actions step. Instead, there are advanced options and *pipeline* steps.
+
+Pipelines are described in Groovy scripts.
+
+In Pipelines, there is a command, `step`, that includes all standard steps for Free Style projects.
+
+```
+node {
+    git branch: '*/master', url: 'https://github.com/g0t4/jenkins2-course-spring-boot.git'
+    
+    def projectPath = 'spring-boot-samples/spring-boot-sample-atmosphere'
+    dir(projectPath) {   // run commands in a custom workind directory
+        sh 'mvn clean package' // run shel command
+    
+        archiveArtifacts 'target/*.jar'  // archive .jar files
+    }
+}
+```
+
+"Master Agent model" sub-chapter is really interesting.
+
+Something interesting about pipelines are *Stage view*. You can add a stage to the Pipeline script with:
+
+```
+stage 'Stage name'
+...
+```
+
+Absolutely fantastic! In the project view, you can see a graph/table/visual-thing about what stages have been successful, what ones have failed, how much time they took to run,... Impresive!
+
+Email notification in a Pipeline
+
+Choose step `emailext`
+
+One can define functions in Pipeline scripts. Awesome! You can define a `notify` method:
+
+```
+def notify(status) {
+  emailext(
+    to: 'rchavarria@whatever.com',
+    subject: "Job ${env.JOB_NAME}",
+    body: "${status}"
+  )
+}
+```
+
+Notify on errors
+
+As the pipeline script is just a groovy script, we can use `try-catch` blocks. Hmmm, this sound weird to me, but ok.
+
+Visualizing test results: through the traditional step of "Publish JUnit..."
+
 # Finding and managing plugins
 
 # Building continuous delivery pipelines
