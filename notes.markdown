@@ -130,6 +130,46 @@ Visualizing test results: through the traditional step of "Publish JUnit..."
 
 # Finding and managing plugins
 
+Integrating code coverage 
+
+For a java project managed with Maven, just run `mvn verify` to generate a HTML code coverage report at `target/site`.
+
+Publishing HTML reports
+
+Pipeline command:
+
+```
+ublishHTML(target: [
+            allowMissing: true,
+            alwaysLinkToLastBuild: false,
+            keepAll: true,
+            reportDir: 'target/site/jacoco/',
+            reportFiles: 'index.html',
+            reportName: 'Code Coverage',
+            reportTitles: ''
+        ])
+``Pipeline command:
+
+```
+publishHTML(target: [
+            allowMissing: true,
+            alwaysLinkToLastBuild: false,
+            keepAll: true,
+            reportDir: 'target/site/jacoco/',
+            reportFiles: 'index.html',
+            reportName: 'Code Coverage',
+            reportTitles: ''
+        ])
+````
+
+BlueOcean UI plugin
+
+A new user interface for Jenkins
+
+It's a experimental plugin for now. You need to go to `Advanced` tab in the `Manage plugins` and add a new source for plugins.
+
+
+
 # Building continuous delivery pipelines
 
 # Summary
