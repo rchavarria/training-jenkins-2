@@ -168,9 +168,30 @@ A new user interface for Jenkins
 
 It's a experimental plugin for now. You need to go to `Advanced` tab in the `Manage plugins` and add a new source for plugins.
 
-
-
 # Building continuous delivery pipelines
+
+## Backup and restore
+
+Just gzip and copy Jenkins home directory. Then, paste it whenever you want, ungzip it and you'll go:
+
+```
+tar -czf jenkins-home.tar.gz ~/.jenkins
+tar -xzf jenkins-home.tar.gz <another/path>
+```
+
+## Stashing pipelines
+
+There is a pipeline command, `stash` to save a *copy* of some files to reuse them in the rest of the pipeline. *stash* means: *reserva oculta*. It's like archiving, but it only lasts the duration of the pipeline.
+
+## Browsing workspace in Pipelines
+
+Workspaces live inside nodes. Every pipeline must reserve a node. To go to the workspace: go to *Pipeline steps*, select the step *Node* and you'll see the workspace.
+
+## Allocating a second node
+
+
+VOY POR AQUI
+
 
 # Summary
 
