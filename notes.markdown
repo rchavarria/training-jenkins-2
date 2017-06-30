@@ -168,10 +168,115 @@ A new user interface for Jenkins
 
 It's a experimental plugin for now. You need to go to `Advanced` tab in the `Manage plugins` and add a new source for plugins.
 
-
-
 # Building continuous delivery pipelines
+
+## Backup and restore
+
+Just gzip and copy Jenkins home directory. Then, paste it whenever you want, ungzip it and you'll go:
+
+```
+tar -czf jenkins-home.tar.gz ~/.jenkins
+tar -xzf jenkins-home.tar.gz <another/path>
+```
+
+## Stashing pipelines
+
+There is a pipeline command, `stash` to save a *copy* of some files to reuse them in the rest of the pipeline. *stash* means: *reserva oculta*. It's like archiving, but it only lasts the duration of the pipeline.
+
+## Browsing workspace in Pipelines
+
+Workspaces live inside nodes. Every pipeline must reserve a node. To go to the workspace: go to *Pipeline steps*, select the step *Node* and you'll see the workspace.
+
+## Allocating a second node
+
+Each time we allocate a node, we're not sure we have the same workspace in all different nodes. Usually, it's the same, but it's not guaranteed.
+
+To share the workspace, we use the `stash` phase/step.
+
+To get a shared workspace (a *stashed* one), we can `unstash <stash-name>`.
+
+Create a new Node in Jenkins, a new Agent:
+
+- Name
+- # of executors
+- Remote root dir: it can be `/tmp/jenkins-<agent-name>`
+- Labels: to identify this agent in Pipelines
+- Launch method: launch agent via Java Web Start can be a good option
+
+When allocating a node in a Pipeline, with `node`, you can pass some parameters, for example, one label we gave the Agent before: `node('agent1_label')`
+
+## Execution and Monitoring parallel builds
+
+The following code will run tests in **parallel**, each one will allocate a new node:
+
+```
+// create a new stage
+stage 'Browser testing'
+
+// run different tests in parallel
+parallel chrome: {
+  runTests('Chrome')
+}, firefox: {
+  runTests('Firefox')
+}, phantomjs: {
+  runTests('PhantomJS')
+}
+
+def runTests(browser) {
+  // each run will allocate a new node
+  node {
+    sh 'rm -rf *'
+    unstash 'everything'
+    // run tests
+    sh "npm run test-single-run -- --browsers ${browser}"
+    // archive test results
+    step([$class: 'JUnitResultArchiver', testResults: 'test-results/**/test-results.xml'])
+  }
+}
+```
+
+## Manual approval step
+
+`input` step is a way to ask the user to enter some data by hand, so it can work as a manual approval, a human must say "Yes" to continue the execution of the job
+
+Do not use `input` inside a `node` step. It will pause an executor until a human press a button. A common pattern to use with `input` is the following:
+
+```
+// first, notify (it must be done in a node)
+node {
+  call_my_notify_method('You must click to continue')
+}
+
+// outside any `node`
+input 'Is it ready to continue?'
+```
+
+There are heavyweight executors and lightweight executors. heavyweight ones run code inside a `node` step, they're common executors. lightweight ones run Pipeline code outside `node`, but they can't run `sh` steps or are not designed to do that.
+
+Lightweight executors belong only to *master* node.
+
+## Deploy to staging
+
+```
+// concurrency `1` means we only want 1 of these stages to be run at the same time, only the newest will be run. the rest will be cancelled by Jenkins
+stage 'Deploy', concurrency: 1
+```
+
+Well, now, it seems `stage` needs a block syntax `{}` and it doesn't accept a parameter called `concurrency`, there will be a new way to accoplish that.
+
+## Jenkinsfile
+
+You can get the content of the Pipeline and make it part of the project source code.
 
 # Summary
 
+Advantages:
+
+1. Split jobs into different stages
+2. It saves the work if Jenkins crash, then it starts when it was
+3. Manual verification
+
+Resources:
+
+- jenkins.io/doc
 
